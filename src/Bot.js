@@ -128,7 +128,7 @@ export default class Bot {
       message += `\n\`${this.mates[i].time}\`\n`
       for (let j in this.mates[i].mates) {
         const mate = this.mates[i].mates[j]
-        message += `${mate.flag} \*${mate.discordId}\* - ${mate.swgoh}\n`
+        message += `${mate.flag} ${mate.name} - ${mate.swgoh}\n`
       }
     }
     await this.message.edit(message)
