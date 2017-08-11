@@ -86,7 +86,10 @@ export default class Bot {
       const user = this.sheet[i]
       this.mates.push({
         name: user.Name,
-        payout: parseInt(user.UTC.substr(0,2))
+        payout: parseInt(user.UTC.substr(0,2)),
+        discordId: user.ID,
+        flag: user.Flag,
+        swgoh: user.SWGOH
       })
     }
     const matesByTime = {}
@@ -125,7 +128,7 @@ export default class Bot {
       message += `\n\`${this.mates[i].time}\`\n`
       for (let j in this.mates[i].mates) {
         const mate = this.mates[i].mates[j]
-        message += `\*${mate.name}\*\n`
+        message += `${mate.flag} \*${mate.discordId}\* - ${mate.swgoh}\n`
       }
     }
     await this.message.edit(message)
