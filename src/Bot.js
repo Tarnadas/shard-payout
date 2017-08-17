@@ -45,11 +45,14 @@ export default class Bot {
   }
 
   async main () {
-    if (this.message) {
-      this.calculateSecondsUntilPayout()
-      await this.sendMessage()
+    try {
+      if (this.message) {
+        this.calculateSecondsUntilPayout()
+        await this.sendMessage()
+      }
+    } catch (err) {} finally {
+      setTimeout(this.main, 30000)
     }
-    setTimeout(this.main, 30000)
   }
 
   async initializeBot () {
