@@ -50,18 +50,33 @@ export default class Bot {
         this.calculateSecondsUntilPayout()
         await this.sendMessage()
       }
-    } catch (err) {} finally {
-      setTimeout(this.main, 30000)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setTimeout(this.main, 60000 - Date.now() % 60000)
     }
   }
 
   async initializeBot () {
     // fetch message. create a new one if necessary
+    /* const a = (await this.writeChannel.fetchMessages()).array()
+    for (let i in a) {
+      await a[i].delete()
+    } */
     const messages = await this.writeChannel.fetchMessages()
     if (messages.array().length === 0) {
-      this.message = await this.writeChannel.send('Time until next payout:\n')
+      try {
+        this.message = await this.writeChannel.send({embed: new Discord.RichEmbed()})
+      } catch (err) {
+        console.log(err)
+      }
     } else {
-      this.message = messages.first()
+      if (messages.first().embeds.length === 0) {
+        await messages.first().delete()
+        this.message = await this.writeChannel.send({embed: new Discord.RichEmbed()})
+      } else {
+        this.message = messages.first()
+      }
     }
   }
 
@@ -126,14 +141,16 @@ export default class Bot {
   }
 
   async sendMessage () {
-    let message = 'Time until next payout:\n'
+    let embed = new Discord.RichEmbed().setColor(0x00AE86).setThumbnail('https://swgoh.gg/static/img/swgohgg-nav.png')
+    let desc = '**Time until next payout**:'
     for (let i in this.mates) {
-      message += `\n\`${this.mates[i].time}\`\n`
+      desc += `\n\`${this.mates[i].time}\`\n`
       for (let j in this.mates[i].mates) {
         const mate = this.mates[i].mates[j]
-        message += `${mate.flag} ${mate.name} - ${mate.swgoh}\n`
+        desc += `${mate.flag} [${mate.name}](${mate.swgoh})\n`
       }
     }
-    await this.message.edit(message)
+    embed.setDescription(desc)
+    await this.message.edit({embed})
   }
 }
