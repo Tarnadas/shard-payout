@@ -132,7 +132,13 @@ export default class Bot {
       p.setUTCHours(mate.payout, 0, 0, 0)
       if (p < now) p.setDate(p.getDate() + 1)
       mate.timeUntilPayout = p.getTime() - now.getTime()
-      const dif = new Date(mate.timeUntilPayout)
+      let dif = new Date(mate.timeUntilPayout)
+      const round = dif % 60000
+      if (round < 30000) {
+        dif -= round
+      } else {
+        dif += 60000 - round
+      }
       mate.time = `${String(dif.getUTCHours()).padStart(2, '00')}:${String(dif.getUTCMinutes()).padStart(2, '00')}`
     }
     this.mates.sort((a, b) => {
