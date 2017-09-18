@@ -133,11 +133,11 @@ export default class Bot {
       if (p < now) p.setDate(p.getDate() + 1)
       mate.timeUntilPayout = p.getTime() - now.getTime()
       let dif = new Date(mate.timeUntilPayout)
-      const round = dif % 60000
+      const round = dif.getTime() % 60000
       if (round < 30000) {
-        dif -= round
+        dif.setTime(dif.getTime() - round)
       } else {
-        dif += 60000 - round
+        dif.setTime(dif.getTime() + 60000 - round)
       }
       mate.time = `${String(dif.getUTCHours()).padStart(2, '00')}:${String(dif.getUTCMinutes()).padStart(2, '00')}`
     }
@@ -150,10 +150,10 @@ export default class Bot {
     let embed = new Discord.RichEmbed().setColor(0x00AE86).setThumbnail('https://swgoh.gg/static/img/swgohgg-nav.png')
     let desc = '**Time until next payout**:'
     for (let i in this.mates) {
-      desc += `\n\`${this.mates[i].time}\`\n`
+      desc += `\n\`${this.mates[i].time}\`   `
       for (let j in this.mates[i].mates) {
         const mate = this.mates[i].mates[j]
-        desc += `${mate.flag} [${mate.name}](${mate.swgoh})\n`
+        desc += `${mate.flag} [${mate.name}](${mate.swgoh})   `
       }
     }
     embed.setDescription(desc)
