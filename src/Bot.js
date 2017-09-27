@@ -155,10 +155,11 @@ export default class Bot {
       for (let j in this.mates[i].mates) {
         const mate = this.mates[i].mates[j]
         // check to see if we've already added names
-        if (fieldText.length > 0) {fieldText += "\n";}
-        fieldText += `${mate.flag} [${mate.name}](${mate.swgoh})`
+        if (fieldText.length > 0) {
+          fieldText += "\n";}
+          fieldText += `${mate.flag} [${mate.name}](${mate.swgoh})`
       }
-      embed.addField(fieldName,fieldText,true)
+      embed.addField(fieldName, fieldText, true)
     }
     embed.setDescription(desc)
     await this.message.edit({embed})
