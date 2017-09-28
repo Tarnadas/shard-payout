@@ -19,7 +19,6 @@
   "homepage": "https://github.com/Tarnadas/shard-payout#readme",
   "dependencies": {
     "discord.js": "^11.1.0",
-    "nightmare": "^2.10.0",
     "uws": "^8.14.1",
     "xlsx": "^0.11.1"
   },

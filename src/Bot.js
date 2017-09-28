@@ -1,19 +1,9 @@
 import Discord from 'discord.js'
-import Nightmare from 'nightmare'
 import XLSX from 'xlsx'
 
 import path from 'path'
 
-const nightmare = Nightmare({
-  show: true,
-  openDevTools: {
-    mode: 'detach'
-  }
-})
-
-const readChannelId = '313398928890527746'
-const writeChannelId = '345179574033842177'
-const xlsxUrl = 'https://onedrive.live.com/view.aspx?resid=B92275A9BF72C170!40986&ithint=file%2cxlsx&app=Excel&authkey=!AJDJRXahXJTfaUU'
+const channelId = '345179574033842177'
 
 export default class Bot {
   constructor (botToken) {
@@ -24,21 +14,15 @@ export default class Bot {
     this.client = new Discord.Client()
     this.client.on("ready", async () => {
       this.client.user.setGame('live countdowns until payout')
-      this.readChannel = this.client.channels.get(readChannelId)
-      this.writeChannel = this.client.channels.get(writeChannelId)
+      this.channel = this.client.channels.get(channelId)
 
-      this.initializeBot()
+      await this.initializeBot()
       console.log('Bot initialized')
     })
 
     this.client.login(botToken)
 
-    // scrape Excel online
-    // TODO not working right now, nightmare is unable to find elements by selectors
-    // await this.scrapeXlsx()
-    // TODO workaround: parse local xlsx file
     this.sheet = XLSX.utils.sheet_to_json(XLSX.readFile(path.resolve(__dirname, '../SWGoH_Shard.xlsx')).Sheets.Sheet1)
-
     this.parseXlsx()
 
     this.main()
@@ -58,43 +42,20 @@ export default class Bot {
   }
 
   async initializeBot () {
-    // fetch message. create a new one if necessary
-    /* const a = (await this.writeChannel.fetchMessages()).array()
-    for (let i in a) {
-      await a[i].delete()
-    } */
-    const messages = await this.writeChannel.fetchMessages()
+    const messages = await this.channel.fetchMessages()
     if (messages.array().length === 0) {
       try {
-        this.message = await this.writeChannel.send({embed: new Discord.RichEmbed()})
+        this.message = await this.channel.send({embed: new Discord.RichEmbed()})
       } catch (err) {
         console.log(err)
       }
     } else {
       if (messages.first().embeds.length === 0) {
         await messages.first().delete()
-        this.message = await this.writeChannel.send({embed: new Discord.RichEmbed()})
+        this.message = await this.channel.send({embed: new Discord.RichEmbed()})
       } else {
         this.message = messages.first()
       }
-    }
-  }
-
-  async scrapeXlsx () {
-    try {
-      // TODO oh my god, please let me scrape you, Excel online
-      nightmare.goto(xlsxUrl)
-        .wait(5000)
-        .evaluate(() => {
-          // console.log(document.querySelector('#m_excelWebRenderer_ewaCtl_commandUIPlaceHolder'))
-          return document.querySelector('body')
-        })
-        .end()
-        .then(res => {
-          console.log(res)
-        })
-    } catch (err) {
-      console.error(err)
     }
   }
 
@@ -150,14 +111,10 @@ export default class Bot {
     let embed = new Discord.RichEmbed().setColor(0x00AE86)
     let desc = '**Time until next payout**:'
     for (let i in this.mates) {
-      let fieldName = `${this.mates[i].time}`
-      let fieldText = ""
-      for (let j in this.mates[i].mates) {
-        const mate = this.mates[i].mates[j]
-        // check to see if we've already added names
-        if (fieldText.length > 0) {
-          fieldText += "\n";}
-          fieldText += `${mate.flag} [${mate.name}](${mate.swgoh})`
+      let fieldName = String(this.mates[i].time)
+      let fieldText = ''
+      for (const mate of this.mates[i].mates) {
+        fieldText += `${mate.flag} [${mate.name}](${mate.swgoh})\n` // Discord automatically trims messages
       }
       embed.addField(fieldName, fieldText, true)
     }
